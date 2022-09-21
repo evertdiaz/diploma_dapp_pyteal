@@ -4,6 +4,7 @@ from pyteal.ast.bytes import Bytes
 # Declare application state storage (immutable)
 global_registrar = Bytes("registrar")
 local_diploma = Bytes("diploma")
+local_asa_diploma = Bytes("diploma_asa")
 
 def approval():
   # Code block invoked during contract initialization. Sets the
@@ -22,11 +23,18 @@ def approval():
   # The first argument was "register_diploma" used by the control flow 
   # below. The second argument is the diploma metadata which is
   # set to the local storage of the supplied account
-  diploma_metadata = Txn.application_args[1]
+  main_data = Txn.application_args[1]
   diploma_receiver = Txn.accounts[1]
+  
   register_diploma = Seq([
       Assert(is_registrar),
-      App.localPut(diploma_receiver, local_diploma, diploma_metadata),
+      App.localPut(diploma_receiver, local_diploma, main_data),
+      Return(Int(1))
+  ])
+
+  set_asa = Seq([
+      Assert(is_registrar),
+      App.localPut(diploma_receiver, local_asa_diploma, main_data),
       Return(Int(1))
   ])
 
@@ -36,7 +44,8 @@ def approval():
     [Txn.application_id() == Int(0), init_contract],
     [Txn.on_completion() == OnComplete.OptIn, Return(Int(1))],
     [Txn.on_completion() == OnComplete.CloseOut, Return(Int(1))],
-    [Txn.application_args[0] == Bytes("register_diploma"), register_diploma]
+    [Txn.application_args[0] == Bytes("register_diploma"), register_diploma],
+    [Txn.application_args[0] == Bytes("set_asa"), set_asa]
   )
 
   return program
