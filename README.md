@@ -1,10 +1,10 @@
 ### access sandbox
 `./sandbox enter algod`
 
-### get local account list
+### set your accounts for testing
 `goal account list`
 
-### app creation
+### app dployment
 ```
 goal app create \
 --creator INSERT_ADDRESS_HERE \
